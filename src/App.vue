@@ -1,20 +1,26 @@
+<style lang="css">
+  @import '../node_modules/bootstrap/dist/css/bootstrap.min.css';
+</style>
+
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <nav class="navbar navbar-expand-sm bg-light">
+      <ul class="navbar-nav">
+        <li class="nav-item">
+          <router-link :to="{ name: 'Accueil' }" class="nav-link">Accueil</router-link>
+        </li>
+        <li class="nav-item">
+          <router-link :to="{ name: 'AjouterPatient' }" class="nav-link">Ajouter Patient</router-link>
+        </li>
+        <li class="nav-item">
+          <router-link :to="{ name: 'Patients' }" class="nav-link">Tous les patients</router-link>
+        </li>
+      </ul>
+    </nav>
+
+    <router-view></router-view>
   </div>
 </template>
-
-<script>
-import HelloWorld from './components/HelloWorld.vue'
-
-export default {
-  name: 'app',
-  components: {
-    HelloWorld
-  }
-}
-</script>
 
 <style>
 #app {
