@@ -16,6 +16,10 @@
                         <label>Prénom</label>
                         <input type="text" name="prenom" class="form-control" required v-model="patient.prenom"/>
                     </div>
+										<div class="form-group">
+                        <label>Sexe</label>
+                        <input type="text" name="sexe" class="form-control" required v-model="patient.sexe"/>
+                    </div>
 					<div class="form-group">
                         <label>Numéro de CNI</label>
                         <input type="text" name="cni" class="form-control" required v-model="patient.cni"/>
@@ -60,9 +64,8 @@ export default {
     modifierPatient() {
 			// eslint-disable-next-line no-console
       // console.log(this.$route.params.id);
-      db.collection('patients').doc(this.$route.params.id).set(this.patient).then(snap => {
-				this.$router.push('/patients');
-			});
+      db.collection('patients').doc(this.$route.params.id).set(this.patient);
+			this.$router.push('/patients');
     }
   }
 }

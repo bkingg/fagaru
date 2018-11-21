@@ -7,6 +7,7 @@
         <tr>
           <th>Nom de famille</th>
           <th>Prénom</th>
+          <th>Sexe</th>
           <th>Groupe Sanguin</th>
           <th>CNI</th>
           <th>Tel</th>
@@ -17,6 +18,7 @@
           <tr v-for="patient in patients" v-bind:key="patient.id">
             <td>{{ patient.nom_de_famille }}</td>
             <td>{{ patient.prenom }}</td>
+            <td>{{ patient.sexe }}</td>
             <td>{{ patient.groupe_sanguin }}</td>
             <td>{{ patient.cni }}</td>
             <td>{{ patient.tel }}</td>
@@ -43,17 +45,24 @@ export default {
   name: 'Patients',
   data() {
     return {
+      orderBy: 'created_at',
+      page: 1,
+      hitsPerPage: 6,
       patients: []
     }
   },
   created() {
-    db.collection('patients').orderBy('created_at').get().then(snap => {
-      snap.forEach(doc => {
-        let patient = {id: doc.id};
-        Object.assign(patient, doc.data()); 
-        this.patients.push(patient);
+    db.collection('patients')
+      .orderBy(this.orderBy)
+      .limit(this.hitsPerPage)
+      .get()
+      .then(snap => {
+        snap.forEach(doc => {
+          let patient = {id: doc.id};
+          Object.assign(patient, doc.data()); 
+          this.patients.push(patient);
+        });
       });
-    });
   }
 }
 </script>

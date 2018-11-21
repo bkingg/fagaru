@@ -16,6 +16,10 @@
                         <label>Prénom</label>
                         <input type="text" name="prenom" class="form-control" required v-model="patient.prenom"/>
                     </div>
+										<div class="form-group">
+                        <label>Sexe</label>
+                        <input type="text" name="sexe" class="form-control" required v-model="patient.sexe"/>
+                    </div>
 					<div class="form-group">
                         <label>Numéro de CNI</label>
                         <input type="text" name="cni" class="form-control" required v-model="patient.cni"/>
@@ -42,30 +46,18 @@ import { db } from '../config/db';
 export default {
 	components: {
 
-	},
-	firestore () {
-        return {
-            patients: db.collection('patients').orderBy('created_at')
-        }
     },
 	data () {
 		return {
-			patient: {
-				nom_de_famille: '',
-				prenom: '',
-				cni: '',
-				tel: '',
-				groupe_sanguin: '',
-                created_at: ''
-			}
+			patient: {}
 		}
 	},
 	methods: {
 		ajouterPatient(e) {
             this.patient.created_at = new Date();
 			db.collection('patients').add(this.patient);
-			e.target.reset();
-			this.$router.push('/patients')
+            e.target.reset();
+			this.$router.push('/patients');
 		}
 	}
 }

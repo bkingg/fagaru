@@ -1,25 +1,37 @@
 // Fiche.vue
 
 <template>
-  <div>
-    <h1>{{ patient.nom_de_famille }} {{ patient.prenom }}</h1>
+  <div class="row">
+    <div class="col-sm-8">
+      <h1>{{ patient.nom_de_famille }} {{ patient.prenom }}</h1>
 
-    <p>Groupe Sanguin: {{ patient.groupe_sanguin }}</p>
-    <p>CNI: {{ patient.cni }}</p>
-    <p>Tel: {{ patient.tel }}</p>
+      <p>Groupe Sanguin: {{ patient.groupe_sanguin }}</p>
+      <p>Sexe: {{ patient.sexe }}</p>
+      <p>CNI: {{ patient.cni }}</p>
+      <p>Tel: {{ patient.tel }}</p>
 
-    <router-link :to="{ name: 'ModifierPatient', params: {id: patient.id }}" class="btn btn-warning">
-      Modifier
-    </router-link>
+      <router-link :to="{ name: 'ModifierPatient', params: {id: patient.id }}" class="btn btn-warning">
+        Modifier
+      </router-link>
+    </div>
+
+    <div class="col-sm-4">
+      <notes/>
+      <ajouter-note/>
+    </div>
   </div>
 </template>
 
 <script>
 import { db } from '../config/db';
+import AjouterNote from './AjouterNote';
+import Notes from './Notes';
 
 export default {
+  name: 'FichePatient',
   components: {
-
+    AjouterNote,
+    Notes
   },
   data () {
     return {
