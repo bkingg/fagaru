@@ -7,6 +7,10 @@
     <p>Groupe Sanguin: {{ patient.groupe_sanguin }}</p>
     <p>CNI: {{ patient.cni }}</p>
     <p>Tel: {{ patient.tel }}</p>
+
+    <router-link :to="{ name: 'ModifierPatient', params: {id: patient.id }}" class="btn btn-warning">
+      Modifier
+    </router-link>
   </div>
 </template>
 
@@ -15,22 +19,18 @@ import { db } from '../config/db';
 
 export default {
   components: {
-      name: 'FichePatient'
-  },
-  firebase: {
-    patients: db.ref('patients'),
-    patientsObj: {
-      source: db.ref('patients'),
-      asObject: true
-    }
+
   },
   data () {
     return {
       patient: {}
     }
   },
-  created() {
-		this.patient = this.patientsObj[this.$route.params.id]
+  created () {
+    db.collection('patients').doc(this.$route.params.id).get().then(doc => {
+      this.patient = { id: doc.id };
+      Object.assign(this.patient, doc.data());
+    });
   }
 }
 </script>

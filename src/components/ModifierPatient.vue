@@ -43,27 +43,26 @@ import { db } from '../config/db';
 
 export default {
   components: {
-      name: 'ModifierPatient'
-  },
-  firebase: {
-    patients: db.ref('patients'),
-    patientsObj: {
-      source: db.ref('patients'),
-      asObject: true
-    }
+
   },
   data () {
     return {
       patient: {}
     }
   },
-  created() {
-		this.patient = this.patientsObj[this.$route.params.id]
-  },
+	created() {
+		db.collection('patients').doc(this.$route.params.id).get().then(doc => {
+      this.patient = { id: doc.id };
+      Object.assign(this.patient, doc.data());
+    });
+	},
   methods: {
     modifierPatient() {
-      this.$firebaseRefs.patients.child(this.$route.params.id).set(this.patient);
-      this.$router.push('/patients');
+			// eslint-disable-next-line no-console
+      // console.log(this.$route.params.id);
+      db.collection('patients').doc(this.$route.params.id).set(this.patient).then(snap => {
+				this.$router.push('/patients');
+			});
     }
   }
 }

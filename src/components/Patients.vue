@@ -14,20 +14,21 @@
         </tr>
       </thead>
       <tbody>
-          <tr v-for="patient of patients" :key="patient['.key']">
+          <tr v-for="patient in patients" v-bind:key="patient.id">
             <td>{{ patient.nom_de_famille }}</td>
             <td>{{ patient.prenom }}</td>
             <td>{{ patient.groupe_sanguin }}</td>
             <td>{{ patient.cni }}</td>
             <td>{{ patient.tel }}</td>
             <td>
-                <router-link :to="{ name: 'FichePatient', params: {id: patient['.key']} }" class="btn btn-primary">
+                <router-link :to="{ name: 'FichePatient', params: {id: patient.id }}" class="btn btn-primary">
                   Afficher
                 </router-link>
-                <router-link :to="{ name: 'ModifierPatient', params: {id: patient['.key']} }" class="btn btn-warning">
+                <router-link :to="{ name: 'ModifierPatient', params: {id: patient.id }}" class="btn btn-warning">
                   Modifier
                 </router-link>
             </td>
+            <td></td>
           </tr>
       </tbody>
     </table>
@@ -39,16 +40,20 @@
 import { db } from '../config/db';
 
 export default {
-  components: {
-      name: 'Patients'
-  },
+  name: 'Patients',
   data() {
     return {
       patients: []
     }
   },
-  firebase: {
-    patients: db.ref('patients')
+  created() {
+    db.collection('patients').orderBy('created_at').get().then(snap => {
+      snap.forEach(doc => {
+        let patient = {id: doc.id};
+        Object.assign(patient, doc.data()); 
+        this.patients.push(patient);
+      });
+    });
   }
 }
 </script>

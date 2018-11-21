@@ -41,11 +41,13 @@
 import { db } from '../config/db';
 export default {
 	components: {
-		name: 'AjouterPatient'
+
 	},
-	firebase: {
-		patients: db.ref('patients')
-	},
+	firestore () {
+        return {
+            patients: db.collection('patients').orderBy('created_at')
+        }
+    },
 	data () {
 		return {
 			patient: {
@@ -53,13 +55,15 @@ export default {
 				prenom: '',
 				cni: '',
 				tel: '',
-				groupe_sanguin: ''
+				groupe_sanguin: '',
+                created_at: ''
 			}
 		}
 	},
 	methods: {
 		ajouterPatient(e) {
-			this.$firebaseRefs.patients.push(this.patient)
+            this.patient.created_at = new Date();
+			db.collection('patients').add(this.patient);
 			e.target.reset();
 			this.$router.push('/patients')
 		}
