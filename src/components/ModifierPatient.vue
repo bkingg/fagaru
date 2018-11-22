@@ -62,8 +62,11 @@ export default {
 	},
   methods: {
     modifierPatient() {
-      db.collection('patients').doc(this.$route.params.id).set(this.patient);
-			this.$router.push('/patients');
+			let $router = this.$router;
+			let patient_id = this.patient.id;
+      db.collection('patients').doc(this.$route.params.id).set(this.patient).then(function() {
+        $router.push('/fiche/' + patient_id);
+      });
     }
   }
 }

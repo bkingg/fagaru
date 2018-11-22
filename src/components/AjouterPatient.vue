@@ -55,9 +55,10 @@ export default {
 	methods: {
 		ajouterPatient(e) {
             this.patient.created_at = new Date();
-			db.collection('patients').add(this.patient);
-            e.target.reset();
-			this.$router.push('/patients');
+			db.collection('patients').add(this.patient).then(doc => {
+                e.target.reset();
+                this.$router.push('/fiche/' + doc.id);
+            });
 		}
 	}
 }

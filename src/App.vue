@@ -18,7 +18,9 @@
       </ul>
     </nav>
 
-    <router-view></router-view>
+    <div class="app-container">
+      <router-view></router-view>
+    </div>
   </div>
 </template>
 
@@ -27,8 +29,11 @@
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+}
+.app-container {
+  padding-left: 20px;
+  padding-right: 20px;
 }
 </style>
