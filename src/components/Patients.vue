@@ -2,7 +2,7 @@
 <template>
   <div>
     <h1>Patients</h1>
-    <table class="table table-striped">
+    <table class="table table-sm table-striped">
       <thead>
         <tr>
           <th>Nom de famille</th>
@@ -23,10 +23,10 @@
             <td>{{ patient.cni }}</td>
             <td>{{ patient.tel }}</td>
             <td>
-                <router-link :to="{ name: 'FichePatient', params: {id: patient.id }}" class="btn btn-primary">
+                <router-link :to="{ name: 'FichePatient', params: {id: patient.id }}" class="btn btn-sm btn-primary">
                   Afficher
                 </router-link>
-                <router-link :to="{ name: 'ModifierPatient', params: {id: patient.id }}" class="btn btn-warning">
+                <router-link :to="{ name: 'ModifierPatient', params: {id: patient.id }}" class="btn btn-sm btn-warning">
                   Modifier
                 </router-link>
             </td>
@@ -34,6 +34,17 @@
           </tr>
       </tbody>
     </table>
+
+    <nav aria-label="Pagination">
+      <ul class="pagination pagination-sm">
+        <li class="page-item">
+          <a class="page-link" @click="paginate('prev')">Précédents</a>
+        </li>
+        <li class="page-item">
+          <a class="page-link" @click="paginate('next')">Suivants</a>
+        </li>
+      </ul>
+    </nav>
   </div>
 </template>
 
@@ -47,7 +58,9 @@ export default {
     return {
       orderBy: 'created_at',
       page: 1,
-      hitsPerPage: 6,
+      hitsPerPage: 2,
+      currentPageLastDoc: {},
+      currentPageFirstDoc: {},
       patients: []
     }
   },
@@ -62,7 +75,53 @@ export default {
           Object.assign(patient, doc.data()); 
           this.patients.push(patient);
         });
+
+        this.currentPageLastDoc = snap.docs[snap.docs.length - 1];
       });
+  },
+  methods: {
+    paginate(direction) {
+      if(direction == 'next') {
+        
+        db.collection('patients')
+          .orderBy(this.orderBy)
+          .limit(this.hitsPerPage)
+          .startAfter(this.currentPageLastDoc)
+          .get()
+          .then(snap => {
+            if(snap.docs.length){
+              this.currentPageFirstDoc = snap.docs[0];
+              this.currentPageLastDoc = snap.docs[snap.docs.length - 1];
+              this.patients = [];
+              snap.forEach(doc => {
+                let patient = {id: doc.id};
+                Object.assign(patient, doc.data()); 
+                this.patients.push(patient);
+              });
+            }
+          });
+      }
+      else if (direction == 'prev') {
+        db.collection('patients')
+          .orderBy(this.orderBy, 'desc')
+          .limit(this.hitsPerPage)
+          .startAfter(this.currentPageFirstDoc)
+          .get()
+          .then(snap => {
+            if(snap.docs.length){
+              this.currentPageFirstDoc = snap.docs[snap.docs.length - 1];
+              this.currentPageLastDoc = snap.docs[0];
+              this.patients = [];
+              snap.forEach(doc => {
+                let patient = {id: doc.id};
+                Object.assign(patient, doc.data()); 
+                this.patients.push(patient);
+              });
+              this.patients.reverse();
+            }
+          });
+      }
+    }
   }
 }
 </script>

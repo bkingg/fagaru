@@ -62,8 +62,6 @@ export default {
 	},
   methods: {
     modifierPatient() {
-			// eslint-disable-next-line no-console
-      // console.log(this.$route.params.id);
       db.collection('patients').doc(this.$route.params.id).set(this.patient);
 			this.$router.push('/patients');
     }
