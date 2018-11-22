@@ -30,8 +30,9 @@ export default {
 	methods: {
 		ajouterNote(e) {
             this.note.created_at = new Date();
-			db.collection('patients').doc(this.$route.params.id).collection('notes').add(this.note);
-            e.target.reset();
+			db.collection('patients').doc(this.$route.params.id).collection('notes').add(this.note).then(function(){
+                e.target.reset();
+            });
 		}
 	}
 }

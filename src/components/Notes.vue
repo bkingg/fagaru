@@ -41,27 +41,28 @@ export default {
       orderBy: 'created_at',
       direction: 'desc',
       page: 1,
-      hitsPerPage: 2,
+      hitsPerPage: 3,
       currentPageLastDoc: {},
       currentPageFirstDoc: {},
       notes: []
     }
   },
   created() {
-		db.collection('patients')
-			.doc(this.$route.params.id)
-			.collection('notes')
+    let notesRef = db
+      .collection('patients')
+      .doc(this.$route.params.id).collection('notes')
       .orderBy(this.orderBy, this.direction)
-      .limit(this.hitsPerPage)
-      .get()
-      .then(snap => {
-        snap.forEach(doc => {
-          let note = {id: doc.id};
-          Object.assign(note, doc.data()); 
-          this.notes.push(note);
-        });
-        this.currentPageLastDoc = snap.docs[snap.docs.length - 1];
+      .limit(this.hitsPerPage);
+      
+    notesRef.onSnapshot(snap => {
+      this.notes = [];
+      snap.forEach(doc => {
+        let note = {id: doc.id};
+        Object.assign(note, doc.data()); 
+        this.notes.push(note);
       });
+      this.currentPageLastDoc = snap.docs[snap.docs.length - 1];
+    });
   },
   methods: {
     paginateNext() {
