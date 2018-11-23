@@ -15,6 +15,9 @@
         <li class="nav-item">
           <router-link :to="{ name: 'Patients' }" class="nav-link">Tous les patients</router-link>
         </li>
+        <li class="nav-item">
+          <a href="#" @click.prevent="logout" class="nav-link">Déconnexion</a>
+        </li>
       </ul>
     </nav>
 
@@ -37,3 +40,22 @@
   padding-right: 20px;
 }
 </style>
+
+
+<script>
+import Firebase from 'firebase'
+
+export default {
+	name: 'App',
+	methods: {
+		logout() {
+			Firebase.auth().signOut().then(() => {
+        this.$router.replace('login');
+      })
+      // .catch(function(error) {
+      //   // An error happened.
+      // });
+		}
+	}
+}
+</script>

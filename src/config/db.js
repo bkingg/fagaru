@@ -1,6 +1,6 @@
 // db.js
-
 import Firebase from 'firebase'
+
 let config = {
 	apiKey: "AIzaSyA-zPRmI1D18e9vkTCP9wPDy_a_2A9HiUM",
 	authDomain: "fagaru-3a3f9.firebaseapp.com",
