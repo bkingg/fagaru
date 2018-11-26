@@ -22,10 +22,10 @@
 
     <nav aria-label="Pagination" v-if="this.notes.length">
       <ul class="pagination pagination-sm justify-content-center">
-        <li class="page-item">
+        <li class="page-item" v-bind:class="{ disabled: hasPrevLink == false }">
           <a class="page-link" @click="paginatePrev()">Précédents</a>
         </li>
-        <li class="page-item">
+        <li class="page-item" v-bind:class="{ disabled: hasNextLink == false }">
           <a class="page-link" @click="paginateNext()">Suivants</a>
         </li>
       </ul>
@@ -47,7 +47,9 @@ export default {
       hitsPerPage: 3,
       currentPageLastDoc: {},
       currentPageFirstDoc: {},
-      notes: []
+      notes: [],
+      hasPrevLink: false,
+      hasNextLink: false
     }
   },
   created() {
@@ -58,13 +60,18 @@ export default {
       .limit(this.hitsPerPage);
       
     notesRef.onSnapshot(snap => {
-      this.notes = [];
-      snap.forEach(doc => {
-        let note = {id: doc.id};
-        Object.assign(note, doc.data()); 
-        this.notes.push(note);
-      });
-      this.currentPageLastDoc = snap.docs[snap.docs.length - 1];
+      if (snap.docs.length) {
+        this.notes = [];
+        snap.forEach(doc => {
+          let note = {id: doc.id};
+          Object.assign(note, doc.data()); 
+          this.notes.push(note);
+        });
+        this.currentPageFirstDoc = snap.docs[0];
+        this.currentPageLastDoc = snap.docs[snap.docs.length - 1];
+        this.hasPrev();
+        this.hasNext();
+      }
     });
   },
   methods: {
@@ -87,6 +94,8 @@ export default {
               Object.assign(note, doc.data()); 
               this.notes.push(note);
             });
+            this.hasPrev();
+            this.hasNext(); 
           }
         });
     },
@@ -110,7 +119,40 @@ export default {
               this.notes.push(note);
             });
             this.notes.reverse();
+            this.hasPrev();
+            this.hasNext(); 
           }
+        });
+    },
+    hasNext() {
+      db.collection('patients')
+        .doc(this.$route.params.id)
+        .collection('notes')
+        .orderBy(this.orderBy, this.direction)
+        .limit(1)
+        .startAfter(this.currentPageLastDoc)
+        .get()
+        .then(snap => {
+          if(snap.docs.length)
+            this.hasNextLink = true;
+          else
+            this.hasNextLink = false;
+        });
+    },
+    hasPrev() {
+      let direction = (this.direction == 'asc') ? 'desc' : 'asc';
+      db.collection('patients')
+        .doc(this.$route.params.id)
+        .collection('notes')
+        .orderBy(this.orderBy, direction)
+        .limit(1)
+        .startAfter(this.currentPageFirstDoc)
+        .get()
+        .then(snap => {
+          if(snap.docs.length)
+            this.hasPrevLink = true;
+          else
+            this.hasPrevLink = false;
         });
     }
   }

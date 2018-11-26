@@ -202,8 +202,6 @@ export default {
         .startAfter(this.currentPageFirstDoc)
         .get()
         .then(snap => {
-          // eslint-disable-next-line no-console
-          console.log(snap);
           if(snap.docs.length)
             this.hasPrevLink = true;
           else
