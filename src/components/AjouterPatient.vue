@@ -18,15 +18,15 @@
                     </div>
 										<div class="form-group">
                         <label>Sexe</label>
-                        <input type="text" name="sexe" class="form-control" required v-model="patient.sexe"/>
+                        <input type="text" name="sexe" class="form-control" v-model="patient.sexe"/>
                     </div>
 					<div class="form-group">
                         <label>Numéro de CNI</label>
-                        <input type="text" name="cni" class="form-control" required v-model="patient.cni"/>
+                        <input type="text" name="cni" class="form-control" v-model="patient.cni"/>
                     </div>
 					<div class="form-group">
                         <label>Numéro de tel</label>
-                        <input type="text" name="tel" class="form-control" required v-model="patient.tel"/>
+                        <input type="text" name="tel" class="form-control" v-model="patient.tel"/>
                     </div>
 					<div class="form-group">
                         <label>Groupe sanguin</label>
@@ -55,6 +55,10 @@ export default {
 	methods: {
 		ajouterPatient(e) {
             this.patient.created_at = new Date();
+            this.patient.nom_de_famille = this.patient.nom_de_famille.toLowerCase();
+            this.patient.prenom = this.patient.prenom.toLowerCase();
+            this.patient.o_nom_de_famille = this.patient.nom_de_famille.toLowerCase();
+            this.patient.o_prenom = this.patient.prenom.toLowerCase();
 			db.collection('patients').add(this.patient).then(doc => {
                 e.target.reset();
                 this.$router.push('/fiche/' + doc.id);

@@ -39,6 +39,12 @@
   padding-left: 20px;
   padding-right: 20px;
 }
+input[type=text] {
+  text-transform: uppercase;
+}
+input[type=text]::placeholder {
+  text-transform: none;
+}
 </style>
 
 

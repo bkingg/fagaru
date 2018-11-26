@@ -2,6 +2,21 @@
 <template>
   <div>
     <h1>Patients</h1>
+
+    <form class="form-inline" v-on:submit.prevent="rechercher">
+      <label class="sr-only" for="nom_de_famille">Nom de famille</label>
+      <input type="text" class="form-control form-control-sm mb-2 mr-sm-2" id="nom_de_famille" placeholder="Nom de famille" v-model="search.nom_de_famille">
+
+      <label class="sr-only" for="prenom">Prénom</label>
+      <input type="text" class="form-control form-control-sm mb-2 mr-sm-2" id="prenom" placeholder="Prénom" v-model="search.prenom">
+
+      <label class="sr-only" for="tel">Numéro de CNI</label>
+      <input type="text" class="form-control form-control-sm mb-2 mr-sm-2" id="prenom" placeholder="Numéro de CNI" v-model="search.cni">
+      
+      <button type="submit" class="btn btn-sm btn-primary mb-2">Rechercher</button>
+    </form>
+
+
     <table class="table table-sm table-striped">
       <thead>
         <tr>
@@ -11,10 +26,10 @@
           <th>Groupe Sanguin</th>
           <th>CNI</th>
           <th>Tel</th>
-          <th colspan="2">Action</th>
+          <th>Actions</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody v-if="patients.length">
           <tr v-for="patient in patients" v-bind:key="patient.id">
             <td>{{ patient.nom_de_famille }}</td>
             <td>{{ patient.prenom }}</td>
@@ -30,17 +45,19 @@
                   Modifier
                 </router-link>
             </td>
-            <td></td>
           </tr>
+      </tbody>
+      <tbody v-else>
+        <tr><td colspan="7" class="text-center">Aucun patient trouvé</td></tr>
       </tbody>
     </table>
 
-    <nav aria-label="Pagination">
+    <nav aria-label="Pagination" v-if="this.patients.length">
       <ul class="pagination pagination-sm justify-content-center">
-        <li class="page-item">
+        <li class="page-item" v-bind:class="{ disabled: hasPrevLink == false }">
           <a class="page-link" @click="paginatePrev()">Précédents</a>
         </li>
-        <li class="page-item">
+        <li class="page-item" v-bind:class="{ disabled: hasNextLink == false }">
           <a class="page-link" @click="paginateNext()">Suivants</a>
         </li>
       </ul>
@@ -56,19 +73,23 @@ export default {
   name: 'Patients',
   data() {
     return {
-      orderBy: 'nom_de_famille',
+      orderBy: ['o_nom_de_famille', 'o_prenom'],
       direction: 'asc',
       page: 1,
-      hitsPerPage: 2,
+      hitsPerPage: 10,
       currentPageLastDoc: {},
       currentPageFirstDoc: {},
-      patients: []
+      patients: [],
+      search: {},
+      patientsRef: db.collection('patients'),
+      hasPrevLink: false,
+      hasNextLink: false
     }
   },
   created() {
-    db.collection('patients')
-      .orderBy(this.orderBy, this.direction)
-      .orderBy('prenom', this.direction)
+    this.patientsRef
+      .orderBy(this.orderBy[0], this.direction)
+      .orderBy(this.orderBy[1], this.direction)
       .limit(this.hitsPerPage)
       .get()
       .then(snap => {
@@ -77,14 +98,45 @@ export default {
           Object.assign(patient, doc.data()); 
           this.patients.push(patient);
         });
-
+        this.currentPageFirstDoc = snap.docs[0];
         this.currentPageLastDoc = snap.docs[snap.docs.length - 1];
+        this.hasPrev();
+        this.hasNext();
       });
   },
   methods: {
-    paginateNext() {        
-      db.collection('patients')
-        .orderBy(this.orderBy, this.direction)
+    rechercher() {
+      this.patientsRef = db.collection('patients')
+
+      if (this.search.nom_de_famille)
+        this.patientsRef = this.patientsRef.where('nom_de_famille', '==', this.search.nom_de_famille.toLowerCase())
+      if (this.search.prenom)
+        this.patientsRef = this.patientsRef.where('prenom', '==', this.search.prenom.toLowerCase())
+      if (this.search.cni)
+        this.patientsRef = this.patientsRef.where('cni', '==', this.search.cni)
+      
+      this.patientsRef
+        .orderBy(this.orderBy[0], this.direction)
+        .orderBy(this.orderBy[1], this.direction)
+        .limit(this.hitsPerPage)
+        .get()
+        .then(snap => {
+          this.patients = [];
+          snap.forEach(doc => {
+            let patient = {id: doc.id};
+            Object.assign(patient, doc.data()); 
+            this.patients.push(patient);
+          });
+          this.currentPageFirstDoc = snap.docs[0];
+          this.currentPageLastDoc = snap.docs[snap.docs.length - 1];
+          this.hasPrev();
+          this.hasNext();
+        });
+    },
+    paginateNext() {   
+      this.patientsRef
+        .orderBy(this.orderBy[0], this.direction)
+        .orderBy(this.orderBy[1], this.direction)
         .limit(this.hitsPerPage)
         .startAfter(this.currentPageLastDoc)
         .get()
@@ -98,13 +150,16 @@ export default {
               Object.assign(patient, doc.data()); 
               this.patients.push(patient);
             });
+            this.hasPrev();
+            this.hasNext(); 
           }
         });
     },
     paginatePrev() {
       let direction = (this.direction == 'asc') ? 'desc' : 'asc';
-      db.collection('patients')
-        .orderBy(this.orderBy, direction)
+      this.patientsRef
+        .orderBy(this.orderBy[0], direction)
+        .orderBy(this.orderBy[1], direction)
         .limit(this.hitsPerPage)
         .startAfter(this.currentPageFirstDoc)
         .get()
@@ -119,7 +174,40 @@ export default {
               this.patients.push(patient);
             });
             this.patients.reverse();
+            this.hasPrev();
+            this.hasNext();
           }
+        });
+    },
+    hasNext() {
+      this.patientsRef
+        .orderBy(this.orderBy[0], this.direction)
+        .orderBy(this.orderBy[1], this.direction)
+        .limit(1)
+        .startAfter(this.currentPageLastDoc)
+        .get()
+        .then(snap => {
+          if(snap.docs.length)
+            this.hasNextLink = true;
+          else
+            this.hasNextLink = false;
+        });
+    },
+    hasPrev() {
+      let direction = (this.direction == 'asc') ? 'desc' : 'asc';
+      this.patientsRef
+        .orderBy(this.orderBy[0], direction)
+        .orderBy(this.orderBy[1], direction)
+        .limit(1)
+        .startAfter(this.currentPageFirstDoc)
+        .get()
+        .then(snap => {
+          // eslint-disable-next-line no-console
+          console.log(snap);
+          if(snap.docs.length)
+            this.hasPrevLink = true;
+          else
+            this.hasPrevLink = false;
         });
     }
   }

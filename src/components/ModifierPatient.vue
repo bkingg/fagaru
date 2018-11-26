@@ -18,17 +18,17 @@
                     </div>
 										<div class="form-group">
                         <label>Sexe</label>
-                        <input type="text" name="sexe" class="form-control" required v-model="patient.sexe"/>
+                        <input type="text" name="sexe" class="form-control" v-model="patient.sexe"/>
                     </div>
-					<div class="form-group">
+										<div class="form-group">
                         <label>Numéro de CNI</label>
-                        <input type="text" name="cni" class="form-control" required v-model="patient.cni"/>
+                        <input type="text" name="cni" class="form-control" v-model="patient.cni"/>
                     </div>
-					<div class="form-group">
+										<div class="form-group">
                         <label>Numéro de tel</label>
-                        <input type="text" name="tel" class="form-control" required v-model="patient.tel"/>
+                        <input type="text" name="tel" class="form-control" v-model="patient.tel"/>
                     </div>
-					<div class="form-group">
+										<div class="form-group">
                         <label>Groupe sanguin</label>
                         <input type="text" name="groupe_sanguin" class="form-control" v-model="patient.groupe_sanguin"/>
                     </div>
@@ -56,16 +56,20 @@ export default {
   },
 	created() {
 		db.collection('patients').doc(this.$route.params.id).get().then(doc => {
-      this.patient = { id: doc.id };
+      this.patient = { 
+				id: doc.id,
+				o_nom_de_famille: doc.data().nom_de_famille.toLowerCase(),
+				o_prenom: doc.data().prenom.toLowerCase()
+			};
       Object.assign(this.patient, doc.data());
     });
 	},
   methods: {
     modifierPatient() {
-			let $router = this.$router;
-			let patient_id = this.patient.id;
-      db.collection('patients').doc(this.$route.params.id).set(this.patient).then(function() {
-        $router.push('/fiche/' + patient_id);
+			this.patient.nom_de_famille = this.patient.nom_de_famille.toLowerCase();
+			this.patient.prenom = this.patient.prenom.toLowerCase();
+      db.collection('patients').doc(this.$route.params.id).set(this.patient).then(() => {
+        this.$router.push('/fiche/' + this.patient.id);
       });
     }
   }

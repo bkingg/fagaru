@@ -9,15 +9,18 @@
           <th>Date</th>
         </tr>
       </thead>
-      <tbody>
+      <tbody v-if="notes.length">
           <tr v-for="note in notes" v-bind:key="note.id">
             <td>{{ note.note }}</td>
             <td nowrap>{{ note.created_at | date('DD-MM-YYYY hh:mm:ss') }}</td>
           </tr>
       </tbody>
+      <tbody v-else>
+        <tr><td colspan="2" class="text-center">Aucune note trouvée</td></tr>
+      </tbody>
     </table>
 
-    <nav aria-label="Pagination">
+    <nav aria-label="Pagination" v-if="this.notes.length">
       <ul class="pagination pagination-sm justify-content-center">
         <li class="page-item">
           <a class="page-link" @click="paginatePrev()">Précédents</a>
